@@ -171,7 +171,6 @@ saveRDS(dist.lithics.region, 'work/dist.ochre.region.rds')
 
 
 
-# The effect of smoothing
-## Apply smoothing
+# Apply smoothing
 dist.ochre.smoothed <- smoothdist(data = dist.ochre, smoothing_list = c(5,10,15,20,30,40))
 saveRDS(dist.ochre.smoothed, 'work/dist.ochre.smoothed.rds')
