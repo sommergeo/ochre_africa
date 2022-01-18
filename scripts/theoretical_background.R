@@ -54,6 +54,9 @@ p1<- ggplot()+
   geom_errorbarh(aes(y=0.96, xmin=8-0.3*2.65, xmax=8+0.3*2.65, color='Type C',height = .02))+
   geom_errorbarh(aes(y=0.92, xmin=8.5-0.3*2.65, xmax=8.5+0.3*2.65, color='Type C',height = .02))+
   guides(color='none')+
+  scale_color_manual(name='',
+                     values=c('#C8503C', '#7DA54B', '#50AAC8'),
+                     breaks=c('Type A','Type B', 'Type C'))+
   labs(x='', y='Age range')+
   scale_x_continuous(limits=c(0,10))+
   theme_void()+
@@ -64,13 +67,19 @@ p1<- ggplot()+
 plot(p1)
 
 p2<- ggplot(r, aes(x=age))+
-  geom_area(aes(y=d1, fill='Type A', color='Type A'),alpha=0.5)+
-  geom_area(aes(y=d2, fill='Type B', color='Type B'),alpha=0.5)+
-  geom_area(aes(y=d5, fill='Type C', color='Type C'),alpha=0.5)+
-  geom_area(aes(y=d6, fill='Type C', color='Type C'),alpha=0.5)+
-  geom_area(aes(y=d7, fill='Type C', color='Type C'),alpha=0.5)+
+  geom_area(aes(y=d1, fill='Type A', color='Type A'),alpha=0.6)+
+  geom_area(aes(y=d2, fill='Type B', color='Type B'),alpha=0.6)+
+  geom_area(aes(y=d5, fill='Type C', color='Type C'),alpha=0.6)+
+  geom_area(aes(y=d6, fill='Type C', color='Type C'),alpha=0.6)+
+  geom_area(aes(y=d7, fill='Type C', color='Type C'),alpha=0.6)+
   geom_line(aes(y=d4,linetype = "Mixed density"))+
   guides(color='none', fill=guide_legend("Date types"), linetype=guide_legend(""))+
+  scale_color_manual(name='',
+                     values=c('#C8503C', '#7DA54B', '#50AAC8'),
+                     breaks=c('Type A','Type B', 'Type C'))+
+  scale_fill_manual(name='',
+                     values=c('#C8503C', '#7DA54B', '#50AAC8'),
+                     breaks=c('Type A','Type B', 'Type C'))+
   labs(x='Time', y='Density')+
   scale_x_continuous(limits=c(0,10))+
   theme_ochre()+
