@@ -1,7 +1,7 @@
 library(tidyverse)
 library(scales)
-#library(extrafont)
-#font_import()
+library(ggthemes)
+
 
 y#### Data ----
 o <- readRDS('work/ochre.rds')
@@ -12,6 +12,10 @@ dist.ochre.region <- readRDS('work/dist.ochre.region.rds')
 dist.lithics.region <- readRDS('work/dist.lithics.region.rds')
 dist.ochre.smoothed <- readRDS('work/dist.ochre.smoothed.rds')
 
+orbital_parameters <- readRDS('work/orbital_parameters.rds')
+pan_african_climate<- readRDS('work/pan_african_climate.rds')
+benthic_isotope <- readRDS('work/benthic_isotope.rds')
+insolation <- readRDS('work/insolation.rds')
 
 
 
@@ -64,7 +68,7 @@ ggsave("results/ochre_age_ranges_climate.tiff", width = 8.4, height = 8.4, units
 
 
 
-#### Plot dating uncertainties
+#### Plot density smoothing
 plt_smoothing <- ggplot(data=dist.ochre.smoothed %>% 
          pivot_longer(-c(age), names_to = 'var', values_to = 'val'),
        aes(x=age, y=val, color=var, linetype=var)) +
@@ -85,3 +89,114 @@ plt_smoothing <- ggplot(data=dist.ochre.smoothed %>%
   theme(legend.position="right")
 plot(plt_smoothing)
 ggsave("results/ochre_density_smoothing.tiff", width = 17.4, height = 8, units = 'cm', dpi=600)
+
+
+
+
+##### Plot regional varbiability ----
+
+# Regional artefact distribution
+region.labs <- c('N Africa', 'C+E Africa', 'S Africa', 'Overall')
+names(region.labs) <- c('n_africa', 'ce_africa', 's_africa', 'overall')
+regional_limits <- c(40000,500000)
+regional_breaks <- seq(0,500000, 20000)
+regional_labels <- function(x) format(x/1000, scientific = FALSE)
+
+
+
+plt_regional <- ggplot()+
+  geom_area(data=dist.lithics.region, aes(x=age,y=val, fill='Lithics', color='Lithics'), alpha=.6)+
+  geom_area(data=dist.ochre.region, aes(x=age,y=val, fill='Ochre', color='Ochre'), alpha=.6)+
+  facet_grid(var~.,
+             labeller = labeller(var=region.labs))+
+  scale_fill_manual(name='',
+                    breaks = c('Lithics','Ochre'),
+                    values = c('#A4A3A9','#A51E37'),
+                    labels = c('Lithics', 'Ochre'))+
+  scale_color_manual(name='',
+                     breaks = c('Lithics','Ochre'),
+                     values = c('#32414B','#A51E37'),
+                     labels = c('Lithics', 'Ochre'))+
+  
+  scale_x_continuous(limits=regional_limits, breaks=regional_breaks, labels=regional_labels)+
+  labs(x='Age ka BP',
+       y='Density')+
+  theme_ochre()+
+  theme(axis.title.x=element_blank(),
+    axis.text.x=element_blank(),
+    axis.ticks.x=element_blank(),
+    strip.background = element_blank(),
+    strip.text.x = element_blank())
+
+plot(plt_regional)
+
+
+# Plot benthic isotopes
+plt_benthic_isotope <- ggplot(data=benthic_isotope, aes(x=age, y=mean))+
+  geom_ribbon(aes(ymin=mean-se, ymax=mean+se), fill='grey80')+
+  geom_line(aes(color=mean))+
+  scale_x_continuous(limits=regional_limits, breaks=regional_breaks, labels=regional_labels)+
+  scale_y_reverse(limits=c(5,3))+
+  scale_color_gradient2_tableau(palette = "Red-Blue Diverging", name='')+
+  labs(x='Age (ka BP)',
+       y='Benthic d18O (‰)')+
+  theme_ochre()+
+  theme(legend.position = "none",
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        strip.background = element_blank(),
+        strip.text.x = element_blank())
+
+plot(plt_benthic_isotope)
+
+
+# Plot Insolation
+plt_insolation <- ggplot(data=insolation, aes(x=age, y=val, linetype=month, color=var)) +
+  geom_line()+
+  scale_color_manual(name='',
+                     breaks = c('N30','S30'),
+                     #values = c('#D29600', '#C8503C'),
+                     values = c('#415A8C', '#AF6E96'),
+                     labels = c('Northern Summer','Southern Summer'))+
+  scale_linetype_manual(name='',
+                        breaks = c('Jun 21st','Dec 21st'),
+                        #values = c('dashed', 'solid'),
+                        values = c('solid', 'solid'),
+                        labels = c('Northern Summer','Southern Summer'))+
+  scale_x_continuous(limits=regional_limits, breaks=regional_breaks, labels=regional_labels)+
+  labs(x='Age ka BP',
+       y='Insolation (W/m²)')+
+  theme_ochre()+
+  theme(legend.position = "none",
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        strip.background = element_blank(),
+        strip.text.x = element_blank())
+plot(plt_insolation)
+
+
+# Plot pan_african_climate
+plt_climate <- ggplot(data=pan_african_climate, aes(x=age, y=PC1, color=PC1)) +
+  geom_line()+
+  scale_y_reverse()+
+  scale_x_continuous(limits=regional_limits, breaks=regional_breaks, labels=regional_labels)+
+  labs(x='Age ka BP',
+       y='Hydroclimate')+
+  scale_color_gradient2_tableau(palette = "Green-Blue Diverging", name='')+
+  theme_ochre()+
+  theme(legend.position = "none",
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        strip.background = element_blank(),
+        strip.text.x = element_blank())
+  
+plot(plt_climate)
+
+# Combine all plots
+plt_ochre_climate <- plt_regional/plt_insolation/plt_climate/plt_benthic_isotope+plot_layout(heights = c(1, 0.3, 0.3, 0.3))
+plot(plt_ochre_climate)
+ggsave('results/ochre_climate.tiff', width = 17.4, height = 23.4, units = 'cm', dpi=600)
+

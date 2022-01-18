@@ -67,11 +67,11 @@ p1<- ggplot()+
 plot(p1)
 
 p2<- ggplot(r, aes(x=age))+
-  geom_area(aes(y=d1, fill='Type A', color='Type A'),alpha=0.6)+
-  geom_area(aes(y=d2, fill='Type B', color='Type B'),alpha=0.6)+
-  geom_area(aes(y=d5, fill='Type C', color='Type C'),alpha=0.6)+
-  geom_area(aes(y=d6, fill='Type C', color='Type C'),alpha=0.6)+
-  geom_area(aes(y=d7, fill='Type C', color='Type C'),alpha=0.6)+
+  geom_area(aes(y=d1, fill='Type A', color='Type A'),alpha=0.7)+
+  geom_area(aes(y=d2, fill='Type B', color='Type B'),alpha=0.7)+
+  geom_area(aes(y=d5, fill='Type C', color='Type C'),alpha=0.7)+
+  geom_area(aes(y=d6, fill='Type C', color='Type C'),alpha=0.7)+
+  geom_area(aes(y=d7, fill='Type C', color='Type C'),alpha=0.7)+
   geom_line(aes(y=d4,linetype = "Mixed density"))+
   guides(color='none', fill=guide_legend("Date types"), linetype=guide_legend(""))+
   scale_color_manual(name='',
