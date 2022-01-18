@@ -19,6 +19,7 @@ o <- o_data %>% mutate(age_mean = (query_age_min+query_age_max)/2, # Calculate a
                             locality.y <= 23.5 & locality.y >= -23.5 ~ 'C+E Africa',
                             locality.y < -23.5 ~ 'S Africa')) %>% 
   mutate(region = factor(region, levels = c('N Africa', 'C+E Africa', 'S Africa')))
+saveRDS(o, 'work/ochre.rds')
 
 # Clean lithic data
 l <- l_data %>% drop_na(query_age_min, query_age_max) %>% 
@@ -32,10 +33,7 @@ l <- l_data %>% drop_na(query_age_min, query_age_max) %>%
                              locality.y <= 23.5 & locality.y >= -23.5 ~ 'C+E Africa',
                              locality.y < -23.5 ~ 'S Africa')) %>% 
   mutate(region = factor(region, levels = c('N Africa', 'C+E Africa', 'S Africa')))
-
-
-# Load theme
-theme_ochre <- readRDS('work/theme_ochre.rds')
+saveRDS(l, 'work/lithics.rds')
 
 
 #### Functions ----
@@ -167,7 +165,7 @@ dist.lithics.region <- data.frame(age=seq(40000,500000,1000),
                                                    mixcoeff = l.s_africa$coeff)[,2]
                                 ) %>% pivot_longer(-c(age), names_to = 'var', values_to = 'val')
 dist.lithics.region$var <- factor(dist.lithics.region$var, levels=c('n_africa', 'ce_africa', 's_africa', 'overall'))
-saveRDS(dist.lithics.region, 'work/dist.ochre.region.rds')
+saveRDS(dist.lithics.region, 'work/dist.lithics.region.rds')
 
 
 

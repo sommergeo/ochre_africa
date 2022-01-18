@@ -1,0 +1,26 @@
+{
+    "id": "F5D60C43",
+    "path": "C:/data/roceeh/Ockerprojekt/script/ochre_climate.R",
+    "project_path": null,
+    "type": "r_source",
+    "hash": "788896954",
+    "contents": "",
+    "dirty": false,
+    "created": 1642496973189.0,
+    "source_on_save": false,
+    "relative_order": 4,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "175,54",
+        "scrollLine": "192"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1642168028,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1642168028,
+    "read_only": false,
+    "read_only_alternatives": []
+}

@@ -2,6 +2,7 @@ library(tidyverse)
 library(patchwork)
 
 mixdist <- readRDS('work/mixdist_function.rds')
+theme_ochre <- readRDS('work/theme_ochre.rds')
 
 r <- data.frame(age=seq(0,10,0.01),
                 d1 = mixdist(age_mean = 2,
@@ -72,7 +73,7 @@ p2<- ggplot(r, aes(x=age))+
   guides(color='none', fill=guide_legend("Date types"), linetype=guide_legend(""))+
   labs(x='Time', y='Density')+
   scale_x_continuous(limits=c(0,10))+
-  theme_bw()+
+  theme_ochre()+
   theme(
     axis.text.x = element_blank(),
     #axis.text.y = element_blank(),
@@ -83,4 +84,4 @@ plot(p2)
 plt <- p2/p1+plot_layout(heights = c(6, 1))
 plot(plt)
 
-ggsave("results/theoretical_background.tiff", width = 17.4, height = 7, units = 'cm', dpi=400)
+ggsave("results/theoretical_background.tiff", width = 17.4, height = 8, units = 'cm', dpi=600)

@@ -1,0 +1,322 @@
+library(tidyverse)
+library(readxl)
+library(patchwork)
+library(ggthemes)
+
+
+setwd("C:/data/roceeh/Ockerprojekt/work")
+set.seed(2020)
+
+#### Data Preparation ----
+# Load data
+data <- read_delim("C:/data/roceeh/Ockerprojekt/data/all_ochre_dates.csv", ";", escape_double = FALSE, trim_ws = TRUE)
+lithics <- read_delim("C:/data/roceeh/Ockerprojekt/data/all_lithics_dates.csv", ";", escape_double = FALSE, trim_ws = TRUE)
+orbital <- read.delim("C:/data/roceeh/Ockerprojekt/data/orbital_parameters.txt")
+insol_dec <- read.delim("C:/data/roceeh/Ockerprojekt/data/Course of Daily Insolation on December 21.txt") %>% select(age=Year,S30=LAT_.30.0) %>% 
+  mutate(age=age*-1) %>% add_column(month='Dec 21st') %>% pivot_longer(c(S30), names_to = 'var', values_to = 'val')
+insol_jun <- read.delim("C:/data/roceeh/Ockerprojekt/data/Course of Daily Insolation on June 21.txt") %>% select(age=Year, N30=LAT_30.0) %>% 
+  mutate(age=age*-1) %>% add_column(month='Jun 21st') %>% pivot_longer(c(N30), names_to = 'var', values_to = 'val')
+insol <- rbind(insol_dec, insol_jun)
+rm(insol_dec,insol_jun)
+LR04<- read_delim("C:/data/roceeh/Ockerprojekt/data/LR04stack.txt", "\t", escape_double = FALSE, trim_ws = TRUE, skip = 3) %>% rename(age=1, mean=2, se=3) %>% mutate(age=age*1000)
+
+mixdist <- readRDS('mixdist_function.rds')
+smoothdist <- readRDS('smoothdist_function.rds')
+theme_ochre <-  function(){
+  list(scale_x_continuous(limits=c(0,500000),
+                          labels = function(x) format(x/1000, scientific = FALSE)),
+       theme_bw(),
+       labs(x='Age (ka BP)',
+            y='Density'))
+}
+
+# Clean data
+d <- data %>% mutate(age_mean = (query_age_min+query_age_max)/2, # Calculate age mean
+                     age_difference = query_age_max-query_age_min,   # Calculate age age_difference
+                     age_sd=(age_difference)/2.65) %>%               # calculate age standard deviation, assuming our range covers p=0.99
+  unite('uid', c(assemblage.locality_idlocality, assemblage.name)) %>% 
+  add_count(uid, name = 'split_assemblage') %>% 
+  mutate(coeff = 1/length(unique(uid))/split_assemblage) %>% 
+  mutate(climate = case_when(locality.y > 23.5 ~ 'Northern Subtropic',
+                             locality.y <= 23.5 & locality.y >= -23.5 ~ 'Tropic',
+                             locality.y < -23.5 ~ 'Southern Subtropic')) %>% 
+  mutate(climate = factor(climate, levels = c('Northern Subtropic', 'Tropic', 'Southern Subtropic')))
+
+d.subtropic_n <- d %>% filter(climate=='Northern Subtropic') %>% select(age_mean,age_sd)
+d.subtropic_s <- d %>% filter(climate=='Southern Subtropic') %>% select(age_mean,age_sd)
+d.tropic <- d %>% filter(climate=='Tropic') %>% select(age_mean,age_sd)
+
+l <- lithics %>% drop_na(query_age_min, query_age_max) %>% 
+                     mutate(age_mean = (query_age_min+query_age_max)/2,  # Calculate age mean
+                     age_difference = query_age_max-query_age_min,   # Calculate age age_difference
+                     age_sd=(age_difference)/2.65) %>%               # calculate age standard deviation, assuming our range covers p=0.99
+  unite('uid', c(assemblage.locality_idlocality, assemblage.name)) %>% 
+  add_count(uid, name = 'split_assemblage') %>% 
+  mutate(coeff = 1/length(unique(uid))/split_assemblage) %>% 
+  mutate(climate = case_when(locality.y > 23.5 ~ 'Northern Subtropic',
+                             locality.y <= 23.5 & locality.y >= -23.5 ~ 'Tropic',
+                             locality.y < -23.5 ~ 'Southern Subtropic')) %>% 
+  mutate(climate = factor(climate, levels = c('Northern Subtropic', 'Tropic', 'Southern Subtropic')))
+
+l.subtropic_n <- l %>% filter(climate=='Northern Subtropic') %>% select(age_mean,age_sd)
+l.subtropic_s <- l %>% filter(climate=='Southern Subtropic') %>% select(age_mean,age_sd)
+l.tropic <- l %>% filter(climate=='Tropic') %>% select(age_mean,age_sd)
+
+o <- orbital %>% mutate(age=year/-1)
+
+
+
+##### Analysis ----
+
+#### Dating inaccuracy ----
+plt_date_scatter <- ggplot(data=d, aes(x=age_mean, y=age_difference))+
+  geom_hline(yintercept=26000, color='black',linetype='dotted')+
+  geom_text(aes(410000,26000,label='precession cycle', vjust=+1))+
+  geom_hline(yintercept=100000, color='black',linetype='dotted')+
+  geom_text(aes(410000,100000,label='eccentricity cycle', vjust=+1))+
+  geom_point(aes(color=climate), alpha=.6)+
+  #scale_colour_brewer(palette = "Dark2")+
+  scale_y_log10(labels = function(x) format(x/1000, scientific = FALSE))+
+  scale_x_continuous(limits=c(0,500000),
+                     labels = function(x) format(x/1000, scientific = FALSE))+
+  scale_color_manual(name='',
+                    breaks = levels(d$climate),
+                    values = c('#415A8C','#7DA546','#AF6E96'),
+                    labels = c('Northern Subtropic', 'Tropic', 'Southern Subtropic'))+
+  labs(x='Age (ka BP)', y='Age range (ka)')+
+  theme_bw()+
+  theme(legend.position="right",
+        panel.grid.minor.y = element_blank())
+plot(plt_date_scatter)
+
+#ggsave("ochre_age_ranges_climate.tiff", width = 17.4, height = 6, units = 'cm', dpi=400)
+#ggsave("ochre_age_ranges_climate.eps", width = 17.4, height = 6, units = 'cm', dpi=400)
+
+
+#### Ochre in different climate zones ----
+dist.ochre.climate <- data.frame(age=seq(40000,500000,1000),
+                                 overall = mixdist(age_mean = d$age_mean,
+                                                     age_sd = d$age_sd,
+                                                     range_min = 40000,
+                                                     range_max = 500000,
+                                                     range_step = 1000)[,2],
+                                 subtropic_n = mixdist(age_mean = d.subtropic_n$age_mean,
+                                                     age_sd = d.subtropic_n$age_sd,
+                                                     range_min = 40000,
+                                                     range_max = 500000,
+                                                     range_step = 1000)[,2],
+                                 tropic = mixdist(age_mean = d.tropic$age_mean,
+                                                  age_sd = d.tropic$age_sd,
+                                                  range_min = 40000,
+                                                  range_max = 500000,
+                                                  range_step = 1000)[,2],  
+                                 subtropic_s = mixdist(age_mean = d.subtropic_s$age_mean,
+                                                       age_sd = d.subtropic_s$age_sd,
+                                                       range_min = 40000,
+                                                       range_max = 500000,
+                                                       range_step = 1000)[,2]
+                                 ) %>% pivot_longer(-c(age), names_to = 'var', values_to = 'val')
+dist.ochre.climate$var <- factor(dist.ochre.climate$var, levels=c('subtropic_n', 'tropic', 'subtropic_s', 'overall'))
+
+dist.lithics.climate <- data.frame(age=seq(40000,500000,1000),
+                                 overall = mixdist(age_mean = l$age_mean,
+                                                   age_sd = l$age_sd,
+                                                   range_min = 40000,
+                                                   range_max = 500000,
+                                                   range_step = 1000)[,2],
+                                 subtropic_n = mixdist(age_mean = l.subtropic_n$age_mean,
+                                                       age_sd = l.subtropic_n$age_sd,
+                                                       range_min = 40000,
+                                                       range_max = 500000,
+                                                       range_step = 1000)[,2],
+                                 tropic = mixdist(age_mean = l.tropic$age_mean,
+                                                  age_sd = l.tropic$age_sd,
+                                                  range_min = 40000,
+                                                  range_max = 500000,
+                                                  range_step = 1000)[,2],  
+                                 subtropic_s = mixdist(age_mean = l.subtropic_s$age_mean,
+                                                       age_sd = l.subtropic_s$age_sd,
+                                                       range_min = 40000,
+                                                       range_max = 500000,
+                                                       range_step = 1000)[,2]
+                                 ) %>% pivot_longer(-c(age), names_to = 'var', values_to = 'val')
+dist.lithics.climate$var <- factor(dist.lithics.climate$var, levels=c('subtropic_n', 'tropic', 'subtropic_s', 'overall'))
+
+
+climate.labs <- c('Overall', 'N Subtropic','Tropic','S Subtropic')
+names(climate.labs) <- c('overall', 'subtropic_n', 'tropic', 'subtropic_s')
+
+plt_czones <- ggplot()+
+  geom_area(data=dist.lithics.climate, aes(x=age, y=val, fill='Lithics', color='Lithics'), alpha=.6)+
+  geom_area(data=dist.ochre.climate, aes(x=age, y=val, fill=var, color=var), alpha=.5)+
+  #geom_line(data=dist.lithics.climate, aes(x=age, y=val))+
+  theme_ochre()+
+  scale_fill_manual(name='Ochre',
+                    breaks = c(levels(dist.ochre.climate$var),'Lithics'),
+                    values = c('#415A8C','#7DA546','#AF6E96', '#A51E37', 'grey60'),
+                    labels = c('Northern Subtropic', 'Tropic', 'Southern Subtropic', 'Overall', 'Lithics only'))+
+  scale_color_manual(name='Ochre',
+                    breaks = c(levels(dist.ochre.climate$var),'Lithics'),
+                    values = c('#415A8C','#7DA546','#AF6E96', '#A51E37', 'grey40'),
+                    labels = c('Northern Subtropic', 'Tropic', 'Southern Subtropic', 'Overall', 'Lithics only'))+
+  facet_grid(var~.,
+             labeller = labeller(var=climate.labs))+
+  #ggtitle('Densities per climate zone')+
+  theme(legend.position = "right",
+        strip.background = element_blank())
+
+plot(plt_czones)
+#ggsave("ochre_density_climate_zones.tiff", width = 17.4, height = 10, units = 'cm', dpi=400)
+
+
+# Climate zones and dating inaccuracy combined
+
+plt_czones_inaccuracy <- plt_date_scatter/plt_czones+plot_layout(heights = c(1, 2))
+plot(plt_czones_inaccuracy)
+#ggsave("ochre_density_climate_zones_accuracy.tiff", width = 17.4, height = 14, units = 'cm', dpi=400)
+
+
+
+
+
+# Ochre and climate proxies 30-150 ka
+plt_czones_lite <- ggplot()+
+  #geom_area(data=dist.lithics.climate, aes(x=age, y=val, fill='Lithics', color='Lithics'), alpha=.6)+
+  geom_area(data=dist.ochre.climate, aes(x=age, y=val, fill=var), alpha=1)+
+  geom_line(data=dist.lithics.climate, aes(x=age, y=val, group=var, color='Lithics'))+
+  
+  facet_grid(var~.,
+             labeller = labeller(var=climate.labs))+
+  theme_ochre()+
+  scale_x_continuous(limits = c(30000,150000),
+                     breaks = seq(0,500000, 20000),
+                     labels = function(x) format(x/1000, scientific = FALSE))+
+  scale_fill_manual(name='Ochre',
+                    breaks = c(levels(dist.ochre.climate$var),'Lithics','ochre'),
+                    values = c('#415A8C','#7DA546','#AF6E96', '#A51E37', 'grey60','#A51E37'),
+                    labels = c('Northern Subtropic', 'Tropic', 'Southern Subtropic', 'Overall', 'Lithics','Ochre'))+
+  scale_color_manual(name='',
+                     breaks = c(levels(dist.ochre.climate$var),'Lithics','ochre'),
+                     values = c('#415A8C','#7DA546','#AF6E96', '#A51E37', 'black','#A51E37'),
+                     labels = c('Northern Subtropic', 'Tropic', 'Southern Subtropic', 'Overall', 'Lithics','Ochre'))+
+  theme(#legend.position = "none",
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        strip.background = element_blank(),
+        strip.text.x = element_blank())
+
+plot(plt_czones_lite)
+
+
+plt_insolation <- ggplot(data=insol, aes(x=age, y=val, linetype=month, color=var)) +
+  geom_line()+
+  scale_color_manual(name='',
+                     breaks = c('N30','S30'),
+                     #values = c('#D29600', '#C8503C'),
+                     values = c('#415A8C', '#AF6E96'),
+                     labels = c('Northern Summer','Southern Summer'))+
+  scale_linetype_manual(name='',
+                        breaks = c('Jun 21st','Dec 21st'),
+                        #values = c('dashed', 'solid'),
+                        values = c('solid', 'solid'),
+                        labels = c('Northern Summer','Southern Summer'))+
+  scale_x_continuous(limits = c(30000,150000),
+                     breaks = seq(0,500000, 20000),
+                     labels = function(x) format(x/1000, scientific = FALSE))+
+  labs(x='Age ka BP',
+       y='Insolation (W/m?)')+
+  theme_bw() +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+plot(plt_insolation)
+
+
+plt_oxygen <- ggplot(data=LR04, aes(x=age, y=mean))+
+  geom_ribbon(aes(ymin=mean-se, ymax=mean+se), fill='grey80')+
+  geom_line(aes(color=mean))+
+  scale_x_continuous(limits = c(30000,150000),
+                     breaks = seq(0,500000, 20000),
+                     labels = function(x) format(x/1000, scientific = FALSE))+
+  scale_y_reverse(limits=c(5,3))+
+  scale_color_gradient2_tableau(palette = "Red-Blue Diverging", name='')+
+  labs(x='Age (ka BP)',
+       y='Benthic d18O (???)')+
+  theme_bw() +
+  theme(legend.position = "none")+
+  guides(color=guide_colorbar(ticks=FALSE, reverse=T, label=F))
+
+plot(plt_oxygen)
+
+plt_climate <- plt_czones_lite/plt_insolation/plt_oxygen+plot_layout(heights = c(1, 0.4, 0.4))
+plot(plt_climate)
+
+ggsave("ochre_climate_2020-06-19.tiff", width = 17.4, height = 16, units = 'cm', dpi=400)
+
+
+
+
+
+
+
+
+
+
+
+
+# Comparison with orbital parameters
+
+plt_czones <- ggplot(data=dist.ochre.climate,
+                     aes(x=age, y=val))+
+  geom_area()+
+  theme_ochre()+
+  scale_color_discrete(name='')+
+  facet_grid(var~.,
+             labeller = labeller(var=climate.labs))+
+  ggtitle('Densities per climate zone')+
+  labs(x='')+
+  scale_x_continuous(limits=c(0,150000),
+                     labels = function(x) format(x/1000, scientific = FALSE))
+plot(plt_czones)
+
+
+plt_orbital <- ggplot(data=o %>% pivot_longer(-c(age,year,perihelion), names_to = 'var', values_to = 'val'),
+                      aes(x=age, y=val))+
+  geom_line()+
+  theme_ochre()+
+  scale_color_discrete(name='')+
+  facet_grid(var~.,scale='free_y')+
+  #ggtitle('')+
+  scale_x_continuous(limits=c(0,150000),
+                     labels = function(x) format(x/1000, scientific = FALSE))
+plot(plt_orbital)
+
+plt_insolation <- ggplot(data=insol, aes(x=age, y=val, linetype=month, color=var)) +
+  geom_line()+
+  #theme_ochre()+
+  scale_color_discrete(name='')+
+  #facet_grid(month~.,scale='free_y')+
+  #ggtitle('')+
+  scale_x_continuous(limits=c(0,150000),
+                     labels = function(x) format(x/1000, scientific = FALSE))
+plot(plt_insolation)
+
+plt_d18O <- ggplot(data=bintanja, aes(x=age, y=Isotot)) +
+  geom_line()+
+  #theme_ochre()+
+  scale_color_discrete(name='')+
+  #facet_grid(month~.,scale='free_y')+
+  #ggtitle('')+
+  scale_x_continuous(limits=c(0,150000),
+                     labels = function(x) format(x/1000, scientific = FALSE))
+
+plot(plt_d18O)
+
+
+
+plt_czones/plt_orbital
+#ggsave("ochre_density_orbital.tiff", width = 15, height = 20, units = 'cm', dpi=400)
+
+
+
