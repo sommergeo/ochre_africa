@@ -1,6 +1,6 @@
 library(tidyverse)
 library(scales)
-library(patchwork)
+library(cowplot)
 
 
 y#### Data ----
@@ -43,7 +43,7 @@ plt_date_scatter <- ggplot(data=ol, aes(x=age_mean, y=age_difference))+
   geom_hline(yintercept=100000, color='black',linetype='dotted')+
   annotate('text', x=1000000, y=100000, label='eccentricity', vjust=-0.5, size=2.86)+
   geom_jitter(width=0.03, height=0.03, aes(color=groups), size=.5, show.legend=TRUE)+
-  scale_color_manual(name='Legend',
+  scale_color_manual(name='Assemblages',
                      values=c(lithics='#A4A3A9', ochre='#A51E37'),
                      breaks=c('lithics','ochre'),
                      guide='legend')+
@@ -105,6 +105,8 @@ regional_labels <- function(x) format(x/1000, scientific = FALSE)
 plt_regional <- ggplot()+
   geom_area(data=dist.lithics.region, aes(x=age,y=val, fill='Lithics', color='Lithics'), alpha=.6)+
   geom_area(data=dist.ochre.region, aes(x=age,y=val, fill='Ochre', color='Ochre'), alpha=.6)+
+  geom_line(data=dist.ochre.region, aes(x=age,y=val, color='Ochre'), alpha=1, show.legend=F)+
+  geom_line(data=dist.lithics.region, aes(x=age,y=val, color='Lithics'), alpha=1, show.legend=F)+
   facet_grid(var~.,
              labeller = labeller(var=region.labs))+
   scale_fill_manual(name='',
@@ -117,7 +119,7 @@ plt_regional <- ggplot()+
                      labels = c('Lithics', 'Ochre'))+
   
   scale_x_continuous(limits=regional_limits, breaks=regional_breaks, labels=regional_labels)+
-  #scale_y_continuous(labels=function(x) format(x, scientific = FALSE))+
+  scale_y_continuous(labels=function(x) format(x, scientific = FALSE))+
   labs(x='Age ka BP',
        y='Density')+
   theme_ochre()+
@@ -127,6 +129,49 @@ plt_regional <- ggplot()+
     strip.background = element_blank(),
     strip.text.x = element_blank())
 plot(plt_regional)
+
+
+# Plot pan_african_climate
+plt_climate <- ggplot(data=pan_african_climate, aes(x=age, y=PC1, color=PC1)) +
+  geom_line()+
+  scale_y_reverse()+
+  scale_x_continuous(limits=regional_limits, breaks=regional_breaks, labels=regional_labels)+
+  labs(x='Age ka BP',
+       y='Hydroclimate')+
+  scale_color_gradientn(colors=c('#0069aa','#d9cec8','#7da54b'), 
+                        limits=c(-3,3), oob=scales::squish, na.value=NA, 
+                        breaks=c(-3,0,3),
+                        labels=c('E Africa\nhumid','','W Africa\nhumid'))+
+  guides(color = guide_colourbar(title = '', reverse=T, barheight=3, order=1))+
+  theme_ochre()+
+  theme(axis.title.x=element_blank(),
+    axis.text.x=element_blank(),
+    axis.ticks.x=element_blank(),
+    strip.background = element_blank(),
+    strip.text.x = element_blank())
+plot(plt_climate)
+
+
+# Plot benthic isotopes
+plt_benthic_isotope <- ggplot(data=benthic_isotope, aes(x=age, y=mean))+
+  geom_ribbon(aes(ymin=mean-se, ymax=mean+se), fill='grey80')+
+  geom_line(aes(color=mean))+
+  scale_x_continuous(limits=regional_limits, breaks=regional_breaks, labels=regional_labels)+
+  scale_y_reverse(limits=c(5.1,3))+
+  scale_color_gradientn(colors=c('#c8503c','grey','#415a8c'), 
+                        limits=c(3,5), oob=scales::squish, na.value=NA, 
+                        breaks=c(3,4,5),
+                        labels=c('Warmer','','Cooler'))+
+  guides(color = guide_colourbar(title = '', reverse=T, barheight=3, order=1))+
+  labs(x='Age (ka BP)',
+       y=bquote("Benthic"~delta^18*O~"(‰)"))+
+  theme_ochre()+
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        strip.background = element_blank(),
+        strip.text.x = element_blank())
+plot(plt_benthic_isotope)
 
 
 plt_orbital_parameters <- ggplot(data=orbital_parameters %>% 
@@ -146,9 +191,9 @@ plt_orbital_parameters <- ggplot(data=orbital_parameters %>%
                      values = c('longdash','solid'),
                      labels = c('Eccentricity', 'Precession'))+
   theme_ochre()+
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank(),
+  theme(#axis.title.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.ticks.x=element_blank(),
         strip.background = element_blank(),
         strip.text.x = element_blank())
 plot(plt_orbital_parameters)
@@ -178,60 +223,15 @@ plt_insolation <- ggplot(data=insolation, aes(x=age, y=val, linetype=var, color=
 plot(plt_insolation)
 
 
-# Plot benthic isotopes
-plt_benthic_isotope <- ggplot(data=benthic_isotope, aes(x=age, y=mean))+
-  geom_ribbon(aes(ymin=mean-se, ymax=mean+se), fill='grey80')+
-  geom_line(aes(color=mean))+
-  scale_x_continuous(limits=regional_limits, breaks=regional_breaks, labels=regional_labels)+
-  scale_y_reverse(limits=c(5.1,3))+
-  scale_color_gradientn(colors=c('#c8503c','grey','#415a8c'), 
-                        limits=c(3,5), oob=scales::squish, na.value=NA, 
-                        breaks=c(3,4,5),
-                        labels=c('Warmer','','Cooler'))+
-  guides(color = guide_colourbar(title = '', reverse=T, barheight=3, order=1))+
-  labs(x='Age (ka BP)',
-       y=bquote(delta^18*O~"(‰)"))+
-  theme_ochre()+
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank(),
-        strip.background = element_blank(),
-        strip.text.x = element_blank())
-plot(plt_benthic_isotope)
 
 
-# Plot pan_african_climate
-plt_climate <- ggplot(data=pan_african_climate, aes(x=age, y=PC1, color=PC1)) +
-  geom_line()+
-  scale_y_reverse()+
-  scale_x_continuous(limits=regional_limits, breaks=regional_breaks, labels=regional_labels)+
-  labs(x='Age ka BP',
-       y='Hydroclimate')+
-  scale_color_gradientn(colors=c('#0069aa','#d9cec8','#7da54b'), 
-                        limits=c(-3,3), oob=scales::squish, na.value=NA, 
-                        breaks=c(-3,0,3),
-                        labels=c('E Africa\nhumid','','W Africa\nhumid'))+
-  guides(color = guide_colourbar(title = '', reverse=T, barheight=3, order=1))+
-  theme_ochre()+
-  theme(#axis.title.x=element_blank(),
-    #axis.text.x=element_blank(),
-    #axis.ticks.x=element_blank(),
-    strip.background = element_blank(),
-    strip.text.x = element_blank())
-plot(plt_climate)
+
+
 
 # Combine all plots
-# Patchwork
-plt_ochre_climate <- plt_regional/plt_orbital_parameters/plt_insolation/plt_benthic_isotope/plt_climate+plot_layout(heights = c(1, 0.3, 0.3, 0.3, 0.3,0.3), guides='keep')
-plot(plt_ochre_climate)
-ggsave('results/ochre_climate1.tiff', width = 17.4, height = 23.4, units = 'cm', dpi=600)
-
-# Cowplot
-library(cowplot)
 plot_grid(plt_regional,
-          plt_orbital_parameters,
-          plt_insolation,
-          plt_benthic_isotope,
           plt_climate, 
-          ncol=1, align='v', axis='lr', rel_heights = c(1,0.3,0.3,0.3,0.4), greedy=F)
-ggsave('results/ochre_climate.tiff', width = 17.4, height = 23.4, units = 'cm', dpi=600)
+          plt_benthic_isotope,
+          plt_orbital_parameters,
+          ncol=1, align='v', axis='lr', rel_heights = c(1,0.3,0.3,0.4), greedy=F)
+ggsave('results/ochre_climate.tiff', width = 17.4, height = 20, units = 'cm', dpi=600)
