@@ -1,0 +1,27 @@
+{
+    "id": "A25E3A6B",
+    "path": "C:/data/git/ochre_africa/scripts/theoretical_background.R",
+    "project_path": "scripts/theoretical_background.R",
+    "type": "r_source",
+    "hash": "672351572",
+    "contents": "",
+    "dirty": false,
+    "created": 1642674967927.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "tempName": "Untitled1",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "84,16",
+        "scrollLine": "61"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1642675010,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1642675010628,
+    "read_only": false,
+    "read_only_alternatives": []
+}

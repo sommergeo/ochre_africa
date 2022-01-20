@@ -3,7 +3,7 @@ library(scales)
 library(cowplot)
 
 
-y#### Data ----
+#### Data ----
 o <- readRDS('work/ochre.rds')
 l <- readRDS('work/lithics.rds')
 dist.ochre <- readRDS('work/dist.ochre.rds')
@@ -64,6 +64,7 @@ plt_date_scatter <- ggplot(data=ol, aes(x=age_mean, y=age_difference))+
 plot(plt_date_scatter)
 
 ggsave("results/ochre_age_ranges_climate.tiff", width = 8.4, height = 8.4, units = 'cm', dpi=600)
+ggsave("results/ochre_age_ranges_climate.svg", width = 8.4, height = 8.4, units = 'cm', dpi=600)
 
 
 
@@ -78,10 +79,10 @@ plt_smoothing <- ggplot(data=dist.ochre.smoothed %>%
                      labels = function(x) format(x/1000, scientific = FALSE))+
   scale_y_continuous(labels = function(x) format(x, scientific = FALSE))+
   labs(x='Age (ka BP)', y='Density')+
-  scale_color_discrete(name='Smoothing interval (ka)', 
+  scale_color_discrete(name='Smoothing interval (ka)\nof ochre distribution', 
                        labels=c('None',5,10,15,20,30,40),
                        breaks=c("density",'smooth5','smooth10','smooth15','smooth20','smooth30','smooth40'))+
-  scale_linetype_manual(name='Smoothing interval (ka)', 
+  scale_linetype_manual(name='Smoothing interval (ka)\nof ochre distribution', 
                         values=c('solid','solid','solid','solid','solid','solid','solid'),
                         labels=c('None',5,10,15,20,30,40),
                         breaks=c("density",'smooth5','smooth10','smooth15','smooth20','smooth30','smooth40'))+
@@ -89,6 +90,7 @@ plt_smoothing <- ggplot(data=dist.ochre.smoothed %>%
   theme(legend.position="right")
 plot(plt_smoothing)
 ggsave("results/ochre_density_smoothing.tiff", width = 17.4, height = 8, units = 'cm', dpi=600)
+ggsave("results/ochre_density_smoothing.svg", width = 17.4, height = 8, units = 'cm', dpi=600)
 
 
 
@@ -109,14 +111,22 @@ plt_regional <- ggplot()+
   geom_line(data=dist.lithics.region, aes(x=age,y=val, color='Lithics'), alpha=1, show.legend=F)+
   facet_grid(var~.,
              labeller = labeller(var=region.labs))+
+  #scale_fill_manual(name='',
+  #                  breaks = c('Lithics','Ochre'),
+  #                  values = c('#A4A3A9','#A51E37'),
+  #                  labels = c('Lithics', 'Ochre'))+
+  #scale_color_manual(name='',
+  #                   breaks = c('Lithics','Ochre'),
+  #                   values = c('#32414B','#A51E37'),
+  #                   labels = c('Lithics', 'Ochre'))+
   scale_fill_manual(name='',
-                    breaks = c('Lithics','Ochre'),
-                    values = c('#A4A3A9','#A51E37'),
-                    labels = c('Lithics', 'Ochre'))+
+                    breaks = c('Ochre','Lithics'),
+                    values = c('#bc6261','#686b74'),
+                    labels = c('Ochre','Lithics'))+
   scale_color_manual(name='',
-                     breaks = c('Lithics','Ochre'),
-                     values = c('#32414B','#A51E37'),
-                     labels = c('Lithics', 'Ochre'))+
+                     breaks = c('Ochre','Lithics'),
+                     values = c('#A51E37','#32414B'),
+                     labels = c('Ochre','Lithics'))+
   
   scale_x_continuous(limits=regional_limits, breaks=regional_breaks, labels=regional_labels)+
   scale_y_continuous(labels=function(x) format(x, scientific = FALSE))+
@@ -235,3 +245,4 @@ plot_grid(plt_regional,
           plt_orbital_parameters,
           ncol=1, align='v', axis='lr', rel_heights = c(1,0.3,0.3,0.4), greedy=F)
 ggsave('results/ochre_climate.tiff', width = 17.4, height = 20, units = 'cm', dpi=600)
+ggsave('results/ochre_climate.svg', width = 17.4, height = 20, units = 'cm', dpi=600)

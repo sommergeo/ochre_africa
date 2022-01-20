@@ -94,3 +94,4 @@ plt <- p2/p1+plot_layout(heights = c(6, 1))
 plot(plt)
 
 ggsave("results/theoretical_background.tiff", width = 17.4, height = 8, units = 'cm', dpi=600)
+ggsave("results/theoretical_background.svg", width = 17.4, height = 8, units = 'cm', dpi=600)
