@@ -1,6 +1,6 @@
 # ochre_africa
- Analyses of spatio-temproal distributions of ochre and lithic assemblages for the publication Dapschauskas et al. 2022, J. World Prehistory
-
+ Analyses of spatio-temproal distributions of ochre and lithic assemblages for the publication Dapschauskas, R., Göden, M.B. Sommer, C., Kandel, A.W. The emergence of habitual ochre use in Africa and its significance for the development of ritual behavior during the Middle Stone Age.
+ 
 ## References
  Our analysis uses the following datasets:
  * ROCEEH ROAD Database (https://www.roceeh.uni-tuebingen.de/roadweb/smarty_road_simple_search.php)
