@@ -1,5 +1,5 @@
 # ochre_africa
- Analyses of spatio-temproal distributions of ochre and lithic assemblages for the publication Dapschauskas, R., Göden, M.B. Sommer, C., Kandel, A.W. The emergence of habitual ochre use in Africa and its significance for the development of ritual behavior during the Middle Stone Age.
+ Analyses of spatio-temproal distributions of ochre and lithic assemblages for the publication by Dapschauskas, R., Göden, M.B. Sommer, C. and Kandel, A.W. entitled "The emergence of habitual ochre use in Africa and its significance for the development of ritual behavior during the Middle Stone Age".
  
 ## References
  Our analysis uses the following datasets:
