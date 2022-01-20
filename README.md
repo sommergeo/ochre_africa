@@ -1,5 +1,5 @@
 # ochre_africa
- Analyses of spatio-temproal distributions of ochre and lithic assemblages for the article Dapschauskas et al. 2022, J. World Prehistory
+ Analyses of spatio-temproal distributions of ochre and lithic assemblages for the publication Dapschauskas et al. 2022, J. World Prehistory
 
 ## References
  Our analysis uses the following datasets:
