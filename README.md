@@ -6,7 +6,7 @@
  * ROCEEH ROAD Database (https://www.roceeh.uni-tuebingen.de/roadweb/smarty_road_simple_search.php)
  * Lisiecki, L. E., & Raymo, M. E. (2005). A Pliocene-Pleistocene stack of 57 globally distributed benthic δ18O records. Paleoceanography, 20(1). https://doi.org/10.1029/2004PA001071
  * Kaboth-Bahr, S., Gosling, W. D., Vogelsang, R., Bahr, A., Scerri, E. M. L., Asrat, A., Cohen, A. S., Düsing, W., Foerster, V., Lamb, H. F., Maslin, M. A., Roberts, H. M., Schäbitz, F., & Trauth, M. H. (2021). Paleo-ENSO influence on African environments and early modern humans. Proceedings of the National Academy of Sciences, 118(23). https://doi.org/10.1073/pnas.2018277118
- * Berger, A. L. (1978). Long-Term Variations of Daily Insolation and Quaternary Climatic Changes. Journal of the Atmospheric Sciences, 35(12), 2362–2367.
+ * Berger, A. (1978). Long-Term Variations of Daily Insolation and Quaternary Climatic Changes. Journal of the Atmospheric Sciences, 35(12), 2362-2367. doi:10.1175/1520-0469(1978)035<2362:ltvodi>2.0.co;2
 
  We used the following Software:
  * R Core Team. (2021). R: A language and environment for statistical computing (Version 4.0.5). Vienna, Austria: R Foundation for Statistical Computing. Retrieved from https://www.R-project.org/
