@@ -1,5 +1,5 @@
 # ochre_africa
-[![DOI](https://zenodo.org/badge/208112340.svg)](https://zenodo.org/badge/latestdoi/208112340)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5883926.svg)](https://doi.org/10.5281/zenodo.5883926)
 
  Analyses of spatio-temproal distributions of ochre and lithic assemblages for the publication by Dapschauskas, R., Göden, M.B. Sommer, C. and Kandel, A.W. entitled "The emergence of habitual ochre use in Africa and its significance for the development of ritual behavior during the Middle Stone Age".
  
